@@ -341,7 +341,7 @@ img {
   margin: 0;
   font-family: "Great Vibes", cursive;
   font-size: var(--fs-hero-names);
-  line-height: 1;
+  line-height: 2;
 }
 
 .tagline {
@@ -578,7 +578,7 @@ img {
 
 .story-item img {
   width: 100%;
-  height: 300px;
+ justify-self: stretch;
   object-fit: cover;
 }
 
