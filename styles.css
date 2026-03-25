@@ -341,7 +341,7 @@ img {
   margin: 0;
   font-family: "Great Vibes", cursive;
   font-size: var(--fs-hero-names);
-  line-height: 1;
+  line-height: 2;
 }
 
 .tagline {
@@ -561,11 +561,23 @@ img {
 
 .story-item {
   width: calc(50% - 2rem);
-  background: rgba(255, 250, 239, 0.9);
-  border: 1px solid var(--line-soft);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(rgba(255, 250, 239, 0.95), rgba(255, 250, 239, 0.95)) padding-box,
+    conic-gradient(
+      from var(--border-angle),
+      var(--gold-1),
+      var(--gold-3),
+      var(--deep-green),
+      var(--gold-2),
+      var(--gold-1)
+    ) border-box;
+  animation:
+    cardFloat 6s ease-in-out infinite,
+    rotateBorderAngle 4s linear infinite;
 }
 
 .story-item:nth-child(odd) {
@@ -580,6 +592,320 @@ img {
   width: 100%;
   height: 300px;
   object-fit: cover;
+}
+
+.story-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: calc(var(--radius-lg) - 2px) calc(var(--radius-lg) - 2px) 0 0;
+}
+
+.story-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-image img {
+  opacity: 0;
+  z-index: 1;
+  transition:
+    opacity 1.2s ease-in-out,
+    clip-path 1.2s ease-in-out,
+    transform 1.2s ease-in-out,
+    filter 1.2s ease-in-out;
+}
+
+.story-image img.active {
+  opacity: 1;
+  z-index: 3;
+}
+
+.story-image img.leaving {
+  z-index: 2;
+}
+
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.story-item:first-child .story-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(247, 216, 137, 0.3) 46%,
+    rgba(255, 253, 245, 0.22) 50%,
+    rgba(247, 216, 137, 0.3) 54%,
+    transparent 62%
+  );
+  transform: translateX(-150%);
+  animation: shimmerSweep 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.story-item:first-child .story-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(20, 14, 4, 0.3) 100%);
+  pointer-events: none;
+}
+
+.story-item:first-child .story-image img {
+  clip-path: inset(4% round 16%);
+  transform: scale(1.1);
+  filter: saturate(1.15) brightness(1.08);
+}
+
+.story-item:first-child .story-image img.active {
+  clip-path: inset(0% round 0%);
+  transform: scale(1);
+  filter: saturate(1.05) brightness(1);
+}
+
+.story-item:first-child .story-content {
+  position: relative;
+  border-top: 1px solid rgba(247, 216, 137, 0.18);
+}
+
+.story-item:first-child .story-content h3 {
+  background: linear-gradient(90deg, var(--gold-3), var(--gold-1), var(--gold-3));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: textShimmer 3s ease-in-out infinite;
+}
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-0.6deg);
+    box-shadow:
+      0 8px 24px rgba(114, 79, 20, 0.18),
+      0 0 0 transparent;
+  }
+  50% {
+    transform: translateY(-12px) rotate(0.6deg);
+    box-shadow:
+      0 28px 60px rgba(114, 79, 20, 0.08),
+      0 0 24px rgba(247, 216, 137, 0.14);
+  }
+}
+
+@keyframes rotateBorderAngle {
+  to { --border-angle: 360deg; }
+}
+
+@keyframes shimmerSweep {
+  0%, 25% {
+    transform: translateX(-150%);
+  }
+  75%, 100% {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes textShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ====== ITEM 2: "Adventures" — Diagonal Sweep ====== */
+
+.story-item:nth-child(2) {
+  animation:
+    cardFloat 6s ease-in-out infinite,
+    rotateBorderAngle 4s linear infinite,
+    perspectiveSway 8s ease-in-out infinite;
+  animation-delay: 0.8s, 0.6s, 0s;
+}
+
+.story-item:nth-child(2) .story-image img {
+  clip-path: polygon(115% -15%, 115% -15%, 115% 115%, 85% 115%);
+}
+
+.story-item:nth-child(2) .story-image img.active {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+}
+
+@keyframes perspectiveSway {
+  0%, 100% { transform: perspective(800px) rotateY(-1.5deg); }
+  50% { transform: perspective(800px) rotateY(1.5deg); }
+}
+
+/* ====== ITEM 3: "Growing Together" — Diamond Bloom ====== */
+
+.story-item:nth-child(3) {
+  animation:
+    cardFloat 6s ease-in-out infinite,
+    rotateBorderAngle 4s linear infinite,
+    warmPulse 5s ease-in-out infinite;
+  animation-delay: 1.6s, 1.2s, 0s;
+}
+
+.story-item:nth-child(3) .story-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(30, 18, 4, 0.22) 100%);
+  pointer-events: none;
+}
+
+.story-item:nth-child(3) .story-image img {
+  clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+}
+
+.story-item:nth-child(3) .story-image img.active {
+  clip-path: polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%);
+}
+
+@keyframes warmPulse {
+  0%, 100% {
+    box-shadow: 0 12px 30px rgba(114, 79, 20, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 12px 30px rgba(114, 79, 20, 0.12),
+      0 0 24px rgba(247, 216, 137, 0.22);
+  }
+}
+
+/* ====== ITEM 4: "Families Meet" — Horizontal Embrace ====== */
+
+.story-item:nth-child(4) {
+  animation:
+    cardFloat 6s ease-in-out infinite,
+    rotateBorderAngle 4s linear infinite,
+    scaleBreath 6s ease-in-out infinite;
+  animation-delay: 2.4s, 1.8s, 0s;
+}
+
+.story-item:nth-child(4) .story-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: linear-gradient(
+    90deg,
+    rgba(247, 216, 137, 0.15) 0%,
+    transparent 15%,
+    transparent 85%,
+    rgba(247, 216, 137, 0.15) 100%
+  );
+  opacity: 0;
+  animation: sideLightPulse 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.story-item:nth-child(4) .story-image img {
+  clip-path: inset(0 50%);
+}
+
+.story-item:nth-child(4) .story-image img.active {
+  clip-path: inset(0 0);
+}
+
+@keyframes scaleBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.012); }
+}
+
+@keyframes sideLightPulse {
+  0%, 20% { opacity: 0; }
+  40%, 60% { opacity: 1; }
+  80%, 100% { opacity: 0; }
+}
+
+/* ====== ITEM 5: "The Promise" — Corner Circle Reveal ====== */
+
+.story-item:nth-child(5) {
+  animation:
+    cardFloat 6s ease-in-out infinite,
+    rotateBorderAngle 4s linear infinite,
+    bottomGlow 5s ease-in-out infinite;
+  animation-delay: 3.2s, 2.4s, 0s;
+}
+
+.story-item:nth-child(5) .story-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: radial-gradient(circle at 0% 0%, rgba(247, 216, 137, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.story-item:nth-child(5) .story-image img {
+  clip-path: circle(0% at 50% 50%);
+}
+
+.story-item:nth-child(5) .story-image img.active {
+  clip-path: circle(150% at 50% 50%);
+}
+
+@keyframes bottomGlow {
+  0%, 100% {
+    box-shadow: 0 12px 30px rgba(114, 79, 20, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 12px 30px rgba(114, 79, 20, 0.12),
+      0 10px 24px -4px rgba(247, 216, 137, 0.2);
+  }
+}
+
+/* ====== ITEM 6: "Forever Begins" — Cross Morph ====== */
+
+.story-item:nth-child(6) {
+  animation:
+    cardFloat 6s ease-in-out infinite,
+    rotateBorderAngle 4s linear infinite,
+    gentleFloat 7s ease-in-out infinite;
+  animation-delay: 4s, 3s, 0s;
+}
+
+.story-item:nth-child(6) .story-image img {
+  clip-path: polygon(
+    35% 0%, 65% 0%, 65% 35%,
+    100% 35%, 100% 65%, 65% 65%,
+    65% 100%, 35% 100%, 35% 65%,
+    0% 65%, 0% 35%, 35% 35%
+  );
+}
+
+.story-item:nth-child(6) .story-image img.active {
+  clip-path: polygon(
+    0% 0%, 100% 0%, 100% 0%,
+    100% 35%, 100% 65%, 100% 100%,
+    100% 100%, 0% 100%, 0% 100%,
+    0% 65%, 0% 35%, 0% 0%
+  );
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-0.4deg);
+    box-shadow: 0 8px 24px rgba(114, 79, 20, 0.14);
+  }
+  50% {
+    transform: translateY(-6px) rotate(0.4deg);
+    box-shadow:
+      0 18px 40px rgba(114, 79, 20, 0.08),
+      0 0 16px rgba(247, 216, 137, 0.1);
+  }
 }
 
 .story-content {
