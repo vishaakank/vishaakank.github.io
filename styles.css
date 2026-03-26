@@ -424,47 +424,211 @@ img {
 
 .countdown-section {
   background: linear-gradient(180deg, rgba(255, 252, 246, 0.86), rgba(247, 239, 225, 0.95));
+  overflow: hidden;
 }
+
+/* ── ECG Heartbeat Line ── */
+
+.ecg-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 200%;
+  height: 80px;
+  opacity: 0.07;
+  z-index: 0;
+  pointer-events: none;
+  animation: ecgScroll 10s linear infinite;
+}
+
+.ecg-path {
+  fill: none;
+  stroke: var(--gold-2);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes ecgScroll {
+  from { transform: translateY(-50%) translateX(0); }
+  to   { transform: translateY(-50%) translateX(-50%); }
+}
+
+/* ── Floating Marigold Petals ── */
+
+.petal-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.marigold-petal {
+  position: absolute;
+  top: -20px;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: petalFall linear infinite;
+}
+
+@keyframes petalFall {
+  0%   { opacity: 0; transform: translateY(0) rotate(0deg) translateX(0); }
+  8%   { opacity: 0.65; }
+  50%  { transform: translateY(260px) rotate(180deg) translateX(25px); }
+  85%  { opacity: 0.4; }
+  100% { opacity: 0; transform: translateY(560px) rotate(380deg) translateX(-15px); }
+}
+
+/* ── Countdown Ring Layout ── */
 
 .countdown {
-  display: grid;
-  grid-template-columns: repeat(7, auto);
+  display: flex;
   justify-content: center;
-  align-items: end;
-  gap: 0.8rem;
+  align-items: flex-start;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
 }
 
-.count-item {
-  min-width: 114px;
+/* ── Individual Ring ── */
+
+.countdown-ring {
+  position: relative;
+  width: 150px;
   text-align: center;
-  padding: 0.8rem 0.6rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--line-soft);
-  background: rgba(255, 251, 241, 0.86);
-  box-shadow: var(--shadow-soft);
+  animation: heartbeat 1.6s ease-in-out infinite;
+}
+
+.countdown-ring:nth-child(2) { animation-delay: 0.08s; }
+.countdown-ring:nth-child(3) { animation-delay: 0.16s; }
+.countdown-ring:nth-child(4) { animation-delay: 0.24s; }
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  5%  { transform: scale(1.045); }
+  10% { transform: scale(0.98); }
+  15% { transform: scale(1.025); }
+  20% { transform: scale(1); }
+}
+
+/* ── Ring SVG ── */
+
+.ring-svg {
+  width: 150px;
+  height: 150px;
+  transform: rotate(-90deg);
+  filter: drop-shadow(0 0 10px rgba(247, 216, 137, 0.25));
+}
+
+.ring-track {
+  fill: none;
+  stroke: rgba(163, 128, 67, 0.1);
+  stroke-width: 4;
+}
+
+.ring-progress {
+  fill: none;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-dasharray: 389.56;
+  stroke-dashoffset: 389.56;
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#ring-days    { stroke: url(#rg-d); }
+#ring-hours   { stroke: url(#rg-h); }
+#ring-minutes { stroke: url(#rg-m); }
+#ring-seconds { stroke: url(#rg-s); transition-duration: 0.4s; }
+
+/* ── Ring Content (centred inside the circle) ── */
+
+.ring-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
 }
 
 .count-value {
   display: block;
   font-family: "Cinzel", serif;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-size: clamp(1.7rem, 4vw, 2.2rem);
   line-height: 1;
   color: var(--gold-3);
 }
 
 .count-label {
   color: var(--text-muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
 }
 
-.count-sep {
-  color: rgba(159, 106, 31, 0.6);
-  font-family: "Cinzel", serif;
-  font-size: 2.2rem;
-  line-height: 1;
+/* ── Love Whispers on Hover ── */
+
+.ring-whisper {
+  display: block;
+  margin-top: 0.45rem;
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  white-space: nowrap;
 }
+
+.countdown-ring:hover .ring-whisper {
+  opacity: 0.85;
+  transform: translateY(0);
+}
+
+/* ── Heartbeat Counter ── */
+
+.heartbeat-counter {
+  text-align: center;
+  margin-top: 2.6rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.08rem;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.01em;
+}
+
+.heartbeat-icon {
+  display: inline-block;
+  color: #c45b5b;
+  font-size: 1.15rem;
+  margin-right: 0.2rem;
+  animation: heartIconBeat 1.3s ease-in-out infinite;
+}
+
+@keyframes heartIconBeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.35); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.18); }
+  56% { transform: scale(1); }
+}
+
+.heartbeat-number {
+  font-family: "Cinzel", serif;
+  font-weight: 600;
+  color: var(--gold-3);
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+/* ── Married Message & Fireworks (kept) ── */
 
 .married-message {
   margin-top: 1.4rem;
@@ -778,16 +942,26 @@ textarea:focus {
   }
 
   .countdown {
-    grid-template-columns: repeat(2, minmax(130px, 1fr));
-    gap: 0.9rem;
+    gap: 1rem;
   }
 
-  .count-sep {
-    display: none;
+  .countdown-ring {
+    width: 120px;
   }
 
-  .count-item {
-    min-width: 0;
+  .ring-svg {
+    width: 120px;
+    height: 120px;
+  }
+
+  .ring-whisper {
+    opacity: 0.7;
+    transform: translateY(0);
+    font-size: 0.7rem;
+  }
+
+  .heartbeat-counter {
+    font-size: 0.92rem;
   }
 
   .floral-dust {

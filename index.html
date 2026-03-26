@@ -71,32 +71,98 @@
       </section>
 
       <section id="countdown" class="section countdown-section">
+        <svg class="ecg-line" aria-hidden="true" preserveAspectRatio="none"></svg>
+        <div class="petal-container" aria-hidden="true"></div>
+
         <div class="container reveal">
           <h2 class="section-title">Counting Every Heartbeat</h2>
           <p class="section-subtitle">
             Until we say our vows on 20 April 2026
           </p>
+
           <div class="countdown" role="timer" aria-live="polite">
-            <div class="count-item">
-              <span id="days" class="count-value">00</span>
-              <span class="count-label">Days</span>
+            <div class="countdown-ring">
+              <svg class="ring-svg" viewBox="0 0 160 160">
+                <defs>
+                  <linearGradient id="rg-d" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f7d889"/>
+                    <stop offset="50%" stop-color="#d5a74a"/>
+                    <stop offset="100%" stop-color="#9f6a1f"/>
+                  </linearGradient>
+                </defs>
+                <circle class="ring-track" cx="80" cy="80" r="62"/>
+                <circle class="ring-progress" id="ring-days" cx="80" cy="80" r="62"/>
+              </svg>
+              <div class="ring-content">
+                <span id="days" class="count-value">00</span>
+                <span class="count-label">Days</span>
+              </div>
+              <span class="ring-whisper">each sunrise, one step closer</span>
             </div>
-            <span class="count-sep" aria-hidden="true">:</span>
-            <div class="count-item">
-              <span id="hours" class="count-value">00</span>
-              <span class="count-label">Hours</span>
+
+            <div class="countdown-ring">
+              <svg class="ring-svg" viewBox="0 0 160 160">
+                <defs>
+                  <linearGradient id="rg-h" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f7d889"/>
+                    <stop offset="50%" stop-color="#d5a74a"/>
+                    <stop offset="100%" stop-color="#9f6a1f"/>
+                  </linearGradient>
+                </defs>
+                <circle class="ring-track" cx="80" cy="80" r="62"/>
+                <circle class="ring-progress" id="ring-hours" cx="80" cy="80" r="62"/>
+              </svg>
+              <div class="ring-content">
+                <span id="hours" class="count-value">00</span>
+                <span class="count-label">Hours</span>
+              </div>
+              <span class="ring-whisper">every hour paints our story</span>
             </div>
-            <span class="count-sep" aria-hidden="true">:</span>
-            <div class="count-item">
-              <span id="minutes" class="count-value">00</span>
-              <span class="count-label">Minutes</span>
+
+            <div class="countdown-ring">
+              <svg class="ring-svg" viewBox="0 0 160 160">
+                <defs>
+                  <linearGradient id="rg-m" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f7d889"/>
+                    <stop offset="50%" stop-color="#d5a74a"/>
+                    <stop offset="100%" stop-color="#9f6a1f"/>
+                  </linearGradient>
+                </defs>
+                <circle class="ring-track" cx="80" cy="80" r="62"/>
+                <circle class="ring-progress" id="ring-minutes" cx="80" cy="80" r="62"/>
+              </svg>
+              <div class="ring-content">
+                <span id="minutes" class="count-value">00</span>
+                <span class="count-label">Minutes</span>
+              </div>
+              <span class="ring-whisper">in these moments, love grows</span>
             </div>
-            <span class="count-sep" aria-hidden="true">:</span>
-            <div class="count-item">
-              <span id="seconds" class="count-value">00</span>
-              <span class="count-label">Seconds</span>
+
+            <div class="countdown-ring">
+              <svg class="ring-svg" viewBox="0 0 160 160">
+                <defs>
+                  <linearGradient id="rg-s" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f7d889"/>
+                    <stop offset="50%" stop-color="#d5a74a"/>
+                    <stop offset="100%" stop-color="#9f6a1f"/>
+                  </linearGradient>
+                </defs>
+                <circle class="ring-track" cx="80" cy="80" r="62"/>
+                <circle class="ring-progress" id="ring-seconds" cx="80" cy="80" r="62"/>
+              </svg>
+              <div class="ring-content">
+                <span id="seconds" class="count-value">00</span>
+                <span class="count-label">Seconds</span>
+              </div>
+              <span class="ring-whisper">heartbeats racing to forever</span>
             </div>
           </div>
+
+          <div class="heartbeat-counter">
+            <span class="heartbeat-icon" aria-hidden="true">♥</span>
+            ~ <span id="heartbeat-count" class="heartbeat-number">0</span> heartbeats between two hearts, racing to forever
+          </div>
+
           <p id="married-message" class="married-message" hidden>
             We're Married!
           </p>

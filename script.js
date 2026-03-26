@@ -147,9 +147,32 @@ function initCountdown() {
   const seconds = q("#seconds");
   const marriedMessage = q("#married-message");
   const fireworksCanvas = q("#fireworks");
+  const heartbeatEl = q("#heartbeat-count");
+
+  const ringDays = q("#ring-days");
+  const ringHours = q("#ring-hours");
+  const ringMinutes = q("#ring-minutes");
+  const ringSeconds = q("#ring-seconds");
+
   if (!days || !hours || !minutes || !seconds || !marriedMessage || !fireworksCanvas) return;
 
+  const C = 2 * Math.PI * 62;
+  const TOTAL_DAYS = 365;
   let fireworksStarted = false;
+  let prevSec = -1;
+
+  function setRing(el, value, max) {
+    if (!el) return;
+    el.style.strokeDashoffset = C * (1 - value / max);
+  }
+
+  function setRingInstant(el, value, max) {
+    if (!el) return;
+    el.style.transition = "none";
+    el.style.strokeDashoffset = C * (1 - value / max);
+    el.offsetHeight;
+    el.style.transition = "";
+  }
 
   const tick = () => {
     const now = new Date();
@@ -160,7 +183,12 @@ function initCountdown() {
       hours.textContent = "00";
       minutes.textContent = "00";
       seconds.textContent = "00";
+      setRing(ringDays, 1, 1);
+      setRing(ringHours, 1, 1);
+      setRing(ringMinutes, 1, 1);
+      setRing(ringSeconds, 1, 1);
       marriedMessage.hidden = false;
+      if (heartbeatEl) heartbeatEl.textContent = "\u221E";
       if (!fireworksStarted) {
         fireworksStarted = true;
         runFireworks(fireworksCanvas);
@@ -177,10 +205,86 @@ function initCountdown() {
     hours.textContent = twoDigits(hourCount);
     minutes.textContent = twoDigits(minuteCount);
     seconds.textContent = twoDigits(secondCount);
+
+    setRing(ringDays, Math.min(dayCount, TOTAL_DAYS), TOTAL_DAYS);
+    setRing(ringHours, hourCount, 24);
+    setRing(ringMinutes, minuteCount, 60);
+
+    if (secondCount > prevSec && prevSec !== -1) {
+      setRingInstant(ringSeconds, secondCount, 60);
+    } else {
+      setRing(ringSeconds, secondCount, 60);
+    }
+    prevSec = secondCount;
   };
 
   tick();
   setInterval(tick, 1000);
+
+  if (heartbeatEl) {
+    const updateBeats = () => {
+      const diff = WEDDING_DATE.getTime() - Date.now();
+      if (diff <= 0) return;
+      const beats = Math.floor((diff / 1000) * 2.4);
+      heartbeatEl.textContent = beats.toLocaleString("en-IN");
+    };
+    updateBeats();
+    setInterval(updateBeats, 100);
+  }
+}
+
+function initPetals() {
+  const container = q(".petal-container");
+  if (!container || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const colors = ["#f5a623", "#e8912d", "#f7c948", "#d4781a", "#f9d56e", "#e6a817"];
+  const shapes = ["50% 0 50% 50%", "0 50% 50% 50%", "50% 50% 0 50%", "50% 50% 50% 0"];
+
+  for (let i = 0; i < 18; i++) {
+    const petal = document.createElement("div");
+    petal.className = "marigold-petal";
+    const size = 7 + Math.random() * 10;
+    petal.style.width = size + "px";
+    petal.style.height = size * 1.35 + "px";
+    petal.style.left = Math.random() * 100 + "%";
+    petal.style.background = colors[Math.floor(Math.random() * colors.length)];
+    petal.style.borderRadius = shapes[Math.floor(Math.random() * shapes.length)];
+    petal.style.animationDelay = (Math.random() * 12) + "s";
+    petal.style.animationDuration = (8 + Math.random() * 9) + "s";
+    container.appendChild(petal);
+  }
+}
+
+function initECG() {
+  const svg = q(".ecg-line");
+  if (!svg || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const seg = 120;
+  const count = 22;
+  const w = seg * count;
+  const y = 30;
+
+  svg.setAttribute("viewBox", "0 0 " + w + " 60");
+
+  let d = "M0," + y;
+  for (let i = 0; i < count; i++) {
+    const x = i * seg;
+    d += " L" + (x + 28) + "," + y;
+    d += " Q" + (x + 34) + "," + (y - 6) + " " + (x + 40) + "," + y;
+    d += " L" + (x + 48) + "," + y;
+    d += " L" + (x + 51) + "," + (y + 4);
+    d += " L" + (x + 54) + "," + (y - 22);
+    d += " L" + (x + 57) + "," + (y + 14);
+    d += " L" + (x + 60) + "," + y;
+    d += " L" + (x + 68) + "," + y;
+    d += " Q" + (x + 76) + "," + (y - 8) + " " + (x + 84) + "," + y;
+    d += " L" + (x + seg) + "," + y;
+  }
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", d);
+  path.setAttribute("class", "ecg-path");
+  svg.appendChild(path);
 }
 
 function toICSDate(localDateInput) {
@@ -296,4 +400,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initCountdown();
   initCalendarButtons();
   initRsvp();
+  initPetals();
+  initECG();
 });
