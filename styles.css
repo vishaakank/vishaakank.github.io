@@ -969,6 +969,96 @@ textarea:focus {
   }
 }
 
+.calendar-dropdown {
+  position: absolute;
+  z-index: 1000;
+  background: rgba(255, 252, 246, 0.98);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: 0.5rem;
+  min-width: 200px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity var(--transition), transform var(--transition);
+  pointer-events: none;
+}
+
+.calendar-dropdown.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.calendar-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: none;
+  background: transparent;
+  font-family: "Cinzel", serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: background var(--transition), color var(--transition);
+}
+
+.calendar-option:hover,
+.calendar-option:focus-visible {
+  background: linear-gradient(135deg, rgba(247, 216, 137, 0.3), rgba(213, 167, 74, 0.25));
+  color: var(--gold-3);
+}
+
+.option-icon {
+  font-size: 1rem;
+}
+
+.calendar-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  z-index: 2000;
+  background: linear-gradient(135deg, rgba(247, 240, 226, 0.98), rgba(255, 252, 246, 0.98));
+  border: 1px solid var(--gold-2);
+  border-radius: 999px;
+  padding: 0.8rem 1.6rem;
+  box-shadow: var(--shadow-soft), 0 0 20px rgba(247, 216, 137, 0.4);
+  font-family: "Cinzel", serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity var(--transition), transform var(--transition);
+  pointer-events: none;
+}
+
+.calendar-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

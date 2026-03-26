@@ -6,6 +6,85 @@ const WEDDING_DATE = new Date("2026-04-20T00:00:00+05:30");
 const q = (selector, scope = document) => scope.querySelector(selector);
 const qa = (selector, scope = document) => [...scope.querySelectorAll(selector)];
 
+function detectPlatform() {
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) return "ios";
+  if (/Android/.test(ua)) return "android";
+  return "desktop";
+}
+
+function buildGoogleCalendarURL(details) {
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: details.title,
+    details: details.description,
+    location: details.location,
+  });
+  
+  const startUTC = new Date(details.start).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const endUTC = new Date(details.end).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  params.append("dates", `${startUTC}/${endUTC}`);
+  
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function buildOutlookURL(details) {
+  const params = new URLSearchParams({
+    subject: details.title,
+    body: details.description,
+    location: details.location,
+    startdt: details.start,
+    enddt: details.end,
+  });
+  
+  return `https://outlook.live.com/calendar/0/action/compose?${params.toString()}`;
+}
+
+function buildYahooURL(details) {
+  const startUTC = new Date(details.start).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const endUTC = new Date(details.end).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  
+  const params = new URLSearchParams({
+    v: "60",
+    title: details.title,
+    st: startUTC,
+    et: endUTC,
+    desc: details.description,
+    in_loc: details.location,
+  });
+  
+  return `https://calendar.yahoo.com/?${params.toString()}`;
+}
+
+function showCalendarToast(message) {
+  const existingToast = q(".calendar-toast");
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "calendar-toast";
+  toast.innerHTML = `<span class="toast-icon">✓</span> ${message}`;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.classList.add("show"), 10);
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+function updateButtonFeedback(button, originalText) {
+  button.textContent = "✓ Added!";
+  button.disabled = true;
+
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.disabled = false;
+  }, 2000);
+}
+
 function initNav() {
   const toggle = q(".nav-toggle");
   const menu = q("#nav-menu");
@@ -287,16 +366,35 @@ function initECG() {
   svg.appendChild(path);
 }
 
-function toICSDate(localDateInput) {
+function toICSDateLocal(localDateInput) {
   const local = new Date(localDateInput);
-  return local.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const year = local.getFullYear();
+  const month = String(local.getMonth() + 1).padStart(2, "0");
+  const day = String(local.getDate()).padStart(2, "0");
+  const hours = String(local.getHours()).padStart(2, "0");
+  const minutes = String(local.getMinutes()).padStart(2, "0");
+  const seconds = String(local.getSeconds()).padStart(2, "0");
+  return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+}
+
+function getVTimezone() {
+  return [
+    "BEGIN:VTIMEZONE",
+    "TZID:Asia/Kolkata",
+    "BEGIN:STANDARD",
+    "DTSTART:19700101T000000",
+    "TZOFFSETFROM:+0530",
+    "TZOFFSETTO:+0530",
+    "END:STANDARD",
+    "END:VTIMEZONE",
+  ].join("\r\n");
 }
 
 function downloadICS(details) {
   const uid = `${Date.now()}-${Math.random().toString(16).slice(2)}@ourwedding.local`;
-  const dtstamp = toICSDate(new Date());
-  const dtstart = toICSDate(details.start);
-  const dtend = toICSDate(details.end);
+  const dtstamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const dtstart = toICSDateLocal(details.start);
+  const dtend = toICSDateLocal(details.end);
   const esc = (v) => String(v).replace(/,/g, "\\,").replace(/\n/g, "\\n");
 
   const content = [
@@ -304,14 +402,26 @@ function downloadICS(details) {
     "VERSION:2.0",
     "PRODID:-//Our Wedding//EN",
     "CALSCALE:GREGORIAN",
+    "X-WR-TIMEZONE:Asia/Kolkata",
+    getVTimezone(),
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${dtstamp}`,
-    `DTSTART:${dtstart}`,
-    `DTEND:${dtend}`,
+    `DTSTART;TZID=Asia/Kolkata:${dtstart}`,
+    `DTEND;TZID=Asia/Kolkata:${dtend}`,
     `SUMMARY:${esc(details.title)}`,
     `DESCRIPTION:${esc(details.description)}`,
     `LOCATION:${esc(details.location)}`,
+    "BEGIN:VALARM",
+    "TRIGGER:-P1D",
+    "ACTION:DISPLAY",
+    `DESCRIPTION:Reminder: ${esc(details.title)} is tomorrow!`,
+    "END:VALARM",
+    "BEGIN:VALARM",
+    "TRIGGER:-PT2H",
+    "ACTION:DISPLAY",
+    `DESCRIPTION:Reminder: ${esc(details.title)} starts in 2 hours!`,
+    "END:VALARM",
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");
@@ -326,28 +436,153 @@ function downloadICS(details) {
   URL.revokeObjectURL(link.href);
 }
 
+function showCalendarDropdown(button, details) {
+  const existingDropdown = q(".calendar-dropdown");
+  if (existingDropdown) {
+    existingDropdown.remove();
+  }
+
+  const dropdown = document.createElement("div");
+  dropdown.className = "calendar-dropdown";
+  dropdown.innerHTML = `
+    <button class="calendar-option" data-provider="google">
+      <span class="option-icon">📅</span> Google Calendar
+    </button>
+    <button class="calendar-option" data-provider="apple">
+      <span class="option-icon">🍎</span> Apple Calendar
+    </button>
+    <button class="calendar-option" data-provider="outlook">
+      <span class="option-icon">📧</span> Outlook
+    </button>
+    <button class="calendar-option" data-provider="yahoo">
+      <span class="option-icon">📆</span> Yahoo Calendar
+    </button>
+    <button class="calendar-option" data-provider="ics">
+      <span class="option-icon">📥</span> Download .ics
+    </button>
+  `;
+
+  document.body.appendChild(dropdown);
+
+  const rect = button.getBoundingClientRect();
+  dropdown.style.top = `${rect.bottom + window.scrollY + 8}px`;
+  dropdown.style.left = `${rect.left + window.scrollX}px`;
+
+  setTimeout(() => dropdown.classList.add("show"), 10);
+
+  const handleOptionClick = (e) => {
+    const option = e.target.closest(".calendar-option");
+    if (!option) return;
+
+    const provider = option.dataset.provider;
+    const originalText = button.textContent;
+
+    switch (provider) {
+      case "google":
+        window.open(buildGoogleCalendarURL(details), "_blank");
+        showCalendarToast("Opened in Google Calendar");
+        break;
+      case "apple":
+        downloadICS(details);
+        showCalendarToast("Calendar event downloaded");
+        break;
+      case "outlook":
+        window.open(buildOutlookURL(details), "_blank");
+        showCalendarToast("Opened in Outlook");
+        break;
+      case "yahoo":
+        window.open(buildYahooURL(details), "_blank");
+        showCalendarToast("Opened in Yahoo Calendar");
+        break;
+      case "ics":
+        downloadICS(details);
+        showCalendarToast("Calendar event downloaded");
+        break;
+    }
+
+    updateButtonFeedback(button, originalText);
+    dropdown.remove();
+  };
+
+  const handleClickOutside = (e) => {
+    if (!dropdown.contains(e.target) && e.target !== button) {
+      dropdown.remove();
+      document.removeEventListener("click", handleClickOutside);
+    }
+  };
+
+  const handleEscape = (e) => {
+    if (e.key === "Escape") {
+      dropdown.remove();
+      document.removeEventListener("keydown", handleEscape);
+    }
+  };
+
+  dropdown.addEventListener("click", handleOptionClick);
+  setTimeout(() => {
+    document.addEventListener("click", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+  }, 10);
+}
+
 function initCalendarButtons() {
   qa(".add-calendar").forEach((button) => {
     button.addEventListener("click", () => {
-      downloadICS({
+      const details = {
         title: button.dataset.title || "Wedding Event",
         description: button.dataset.description || "Wedding celebration",
         location: button.dataset.location || "Harsh Udayan Resort, Aligarh",
         start: button.dataset.start || "2026-04-20T10:00:00",
         end: button.dataset.end || "2026-04-20T12:00:00",
-      });
+      };
+
+      const platform = detectPlatform();
+      const originalText = button.textContent;
+
+      if (platform === "android") {
+        window.open(buildGoogleCalendarURL(details), "_blank");
+        showCalendarToast("Opened in Google Calendar");
+        updateButtonFeedback(button, originalText);
+      } else if (platform === "ios") {
+        downloadICS(details);
+        showCalendarToast("Calendar event downloaded");
+        updateButtonFeedback(button, originalText);
+      } else {
+        showCalendarDropdown(button, details);
+      }
     });
   });
+}
+
+async function getUserIP() {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    return "Unknown";
+  }
 }
 
 async function submitRsvp(form, statusEl) {
   const submitButton = q('button[type="submit"]', form);
   const formData = new FormData(form);
+  
+  const userIP = await getUserIP();
+  const platform = detectPlatform();
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const language = navigator.language;
+  
+  const originalMessage = String(formData.get("message") || "");
+  
+  const trackingInfo = `\n\n[Platform: ${platform} | IP: ${userIP} | TZ: ${timezone} | Lang: ${language}]`;
+  const fullMessage = originalMessage + trackingInfo;
+  
   const payload = new URLSearchParams({
     guestName: String(formData.get("guestName") || ""),
     guestCount: String(formData.get("guestCount") || "1"),
     attending: String(formData.get("attending") || ""),
-    message: String(formData.get("message") || ""),
+    message: fullMessage,
     submittedAt: new Date().toISOString(),
   });
 
